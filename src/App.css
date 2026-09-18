@@ -1,0 +1,418 @@
+.app-root {
+  position: relative;
+  width: 100%;
+  height: 100svh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, #fff6e9 0%, #f5ecff 45%, #e6f7ff 100%);
+  transition: background 1.2s ease;
+}
+
+/* ---------- 待機画面：ふわふわ浮かぶ装飾 ---------- */
+
+.sky-decor {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.floaty {
+  animation-name: floaty;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  opacity: 0.85;
+}
+
+@keyframes floaty {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-16px) rotate(6deg);
+  }
+}
+
+/* ---------- 待機画面：カード ---------- */
+
+.idle-card {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 36px;
+  padding: 48px 56px 40px;
+  box-shadow: 0 24px 60px rgba(216, 149, 197, 0.25);
+}
+
+.idle-illustration {
+  margin-bottom: 12px;
+  animation: floaty 4.5s ease-in-out infinite;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #b388ff;
+}
+
+.idle-title {
+  margin: 6px 0 4px;
+  font-size: 40px;
+  line-height: 1.5;
+  font-weight: 800;
+  background: linear-gradient(90deg, #ff6fae, #b388ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.idle-subtitle {
+  margin: 0 0 20px;
+  color: #8a7a94;
+  font-size: 16px;
+}
+
+.countdown {
+  margin: 0 0 26px;
+}
+
+.countdown-label {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #8a7a94;
+}
+
+.countdown-grid {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.countdown-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 56px;
+  padding: 10px 8px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(255, 111, 174, 0.12), rgba(179, 136, 255, 0.12));
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+.countdown-number {
+  font-size: 22px;
+  line-height: 1.4;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  background: linear-gradient(90deg, #ff6fae, #b388ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.countdown-unit {
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #8a7a94;
+}
+
+.reveal-button {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: inherit;
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  padding: 18px 40px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(135deg, #ff6fae, #b388ff);
+  box-shadow: 0 12px 28px rgba(255, 111, 174, 0.45);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+}
+
+.reveal-button::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 40%, rgba(255, 255, 255, 0.5) 50%, transparent 60%);
+  transform: translateX(-100%);
+  animation: shine 3s ease-in-out infinite;
+}
+
+@keyframes shine {
+  0%,
+  20% {
+    transform: translateX(-100%);
+  }
+  50%,
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.reveal-button:hover {
+  transform: scale(1.05) translateY(-2px);
+  box-shadow: 0 16px 34px rgba(255, 111, 174, 0.55);
+}
+
+.reveal-button:active {
+  transform: scale(0.97);
+}
+
+/* ---------- 紙吹雪 & 風船 ---------- */
+
+.fx-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  transition: opacity 0.8s ease;
+}
+
+.fx-layer.fx-soft {
+  opacity: 0.55;
+}
+
+.confetti {
+  position: absolute;
+  top: -10vh;
+  opacity: 0;
+  animation-name: confetti-fall;
+  animation-timing-function: ease-in;
+  animation-iteration-count: infinite;
+}
+
+.shape-circle {
+  border-radius: 50%;
+}
+
+.shape-rect {
+  border-radius: 2px;
+}
+
+.shape-triangle {
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--drift), 120vh, 0) rotate(var(--rotate));
+    opacity: 0.9;
+  }
+}
+
+.balloon {
+  position: absolute;
+  bottom: -20vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0;
+  animation-name: balloon-float;
+  animation-timing-function: ease-out;
+  animation-iteration-count: infinite;
+}
+
+.balloon-body {
+  position: relative;
+  width: 50px;
+  height: 62px;
+  border-radius: 50% 50% 50% 50% / 55% 55% 45% 45%;
+  box-shadow: inset -6px -8px 10px rgba(0, 0, 0, 0.15);
+}
+
+.balloon-shine {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  width: 14px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.balloon-string {
+  width: 2px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+@keyframes balloon-float {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--drift), -140vh, 0);
+    opacity: 1;
+  }
+}
+
+/* ---------- 発表画面 ---------- */
+
+.reveal-scene {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.burst-rays {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 160vmax;
+  height: 160vmax;
+  transform: translate(-50%, -50%);
+  background: repeating-conic-gradient(var(--ray-color) 0deg 10deg, transparent 10deg 20deg);
+  opacity: 0.4;
+  animation: spin 50s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+.reveal-card {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  border-radius: 36px;
+  padding: 48px 64px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.15);
+  animation: card-in 0.7s ease-out;
+}
+
+.reveal-icons {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.bounce-in {
+  opacity: 0;
+  animation-name: bounce-in;
+  animation-duration: 0.6s;
+  animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation-fill-mode: forwards;
+}
+
+.bounce-1 {
+  animation-delay: 0.1s;
+}
+.bounce-2 {
+  animation-delay: 0.25s;
+}
+.bounce-3 {
+  animation-delay: 0.4s;
+}
+
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.reveal-kicker {
+  display: inline-block;
+  margin: 0 0 8px;
+  padding: 4px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.reveal-message {
+  margin: 0;
+  font-size: 56px;
+  line-height: 1.4;
+  font-weight: 800;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+@keyframes card-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 600px) {
+  .idle-card {
+    padding: 36px 28px 32px;
+  }
+
+  .idle-title {
+    font-size: 30px;
+  }
+
+  .countdown-item {
+    min-width: 46px;
+    padding: 8px 6px;
+  }
+
+  .countdown-number {
+    font-size: 18px;
+  }
+
+  .reveal-button {
+    font-size: 17px;
+    padding: 16px 30px;
+  }
+
+  .reveal-card {
+    padding: 36px 28px;
+  }
+
+  .reveal-message {
+    font-size: 38px;
+  }
+}
