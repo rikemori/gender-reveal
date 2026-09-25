@@ -1,17 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import {
-  Star,
-  Heart,
-  Cloud,
-  GiftBox,
-  Camera,
-  Pencil,
-  Trash,
-  ChevronLeft,
-  ChevronRight,
-  Key,
-  Plus,
-} from './Decorations'
+import { Camera, Pencil, Trash, ChevronLeft, ChevronRight, Key, Plus } from './Decorations'
 import './App.css'
 
 // ============================================================
@@ -33,8 +21,8 @@ const echoSrc = (url) => (url.startsWith('data:') ? url : `${IMAGES_BASE}${url}`
 
 const GENDER_CONFIG = {
   boy: {
-    message: '男の子です',
-    kicker: 'Baby is maybe a Boy',
+    kicker: 'Baby is maybe a',
+    word: 'Boy',
     accent: '#4f7bab',
     accentSoft: '#e4edf6',
     gradientStart: '#eaf1f8',
@@ -42,8 +30,8 @@ const GENDER_CONFIG = {
     resultImage: 'baby_boy10_heart.png',
   },
   girl: {
-    message: '女の子です',
-    kicker: 'Baby is maybe a Girl',
+    kicker: 'Baby is maybe a',
+    word: 'Girl',
     accent: '#bd5b7f',
     accentSoft: '#f7e6ec',
     gradientStart: '#faeef1',
@@ -78,31 +66,21 @@ const DEFAULT_ECHOES = [
   { url: 'echo_11_2.jpg', caption: '2026.09.16.（26w5d）' },
 ]
 
-const CONFETTI_COLORS = ['#c9a227', '#bd5b7f', '#93a889', '#e7c9b0', '#ffffff']
-const CONFETTI_SHAPES = ['circle', 'rect', 'triangle']
+const CONFETTI_COLORS = ['#c9a227', '#bd5b7f', '#93a889', '#e7c9b0']
+const CONFETTI_SHAPES = ['circle', 'rect']
 
+// 紙吹雪というより「花びらが舞う」くらい控えめな数・速さにする
 function createConfetti(count) {
   return Array.from({ length: count }, (_, i) => ({
     id: i,
     left: Math.random() * 100,
-    delay: Math.random() * 3.2,
-    duration: 3.6 + Math.random() * 2.6,
-    drift: `${(Math.random() - 0.5) * 40}vw`,
+    delay: Math.random() * 3.6,
+    duration: 5 + Math.random() * 3.2,
+    drift: `${(Math.random() - 0.5) * 30}vw`,
     rotate: `${360 + Math.random() * 360}deg`,
     color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
-    size: 7 + Math.random() * 8,
+    size: 6 + Math.random() * 7,
     shape: CONFETTI_SHAPES[Math.floor(Math.random() * CONFETTI_SHAPES.length)],
-  }))
-}
-
-function createBalloons(count) {
-  return Array.from({ length: count }, (_, i) => ({
-    id: i,
-    left: 4 + Math.random() * 92,
-    delay: Math.random() * 1.4,
-    duration: 5 + Math.random() * 2.6,
-    drift: `${(Math.random() - 0.5) * 16}vw`,
-    color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
   }))
 }
 
@@ -163,13 +141,45 @@ function pad(n) {
   return String(n).padStart(2, '0')
 }
 
+// 待機画面にふわふわ漂わせる、控えめな幾何学の飾り（アイコンではなく小さな図形にする）
 const SKY_DECOR = [
-  { Icon: Star, top: '10%', left: '8%', size: 26, color: '#c9a227', duration: 7 },
-  { Icon: Cloud, top: '18%', left: '78%', size: 66, color: '#ffffff', duration: 10 },
-  { Icon: Heart, top: '70%', left: '10%', size: 24, color: '#cf93ab', duration: 8 },
-  { Icon: Cloud, top: '6%', left: '44%', size: 46, color: '#ffffff', duration: 9 },
-  { Icon: Star, top: '82%', left: '82%', size: 18, color: '#93a889', duration: 6.5 },
+  { shape: 'diamond', top: '10%', left: '8%', size: 8, color: '#c9a227', duration: 7 },
+  { shape: 'ring', top: '18%', left: '80%', size: 34, color: '#cf93ab', duration: 10 },
+  { shape: 'dot', top: '72%', left: '11%', size: 6, color: '#93a889', duration: 8 },
+  { shape: 'ring', top: '8%', left: '46%', size: 20, color: '#e7c9b0', duration: 9 },
+  { shape: 'diamond', top: '82%', left: '84%', size: 6, color: '#bd5b7f', duration: 6.5 },
 ]
+
+// 出産予定日までのカウントダウン表示（開封前も開封後も同じものを出す）
+function CountdownBlock({ countdown }) {
+  return (
+    <div className="countdown">
+      <p className="countdown-label">予定日（12/18）まで</p>
+      {countdown.reached ? (
+        <p className="countdown-reached">出産予定日を迎えました👶✨</p>
+      ) : (
+        <div className="countdown-grid">
+          <div className="countdown-item">
+            <span className="countdown-number">{countdown.days}</span>
+            <span className="countdown-unit">日</span>
+          </div>
+          <div className="countdown-item">
+            <span className="countdown-number">{pad(countdown.hours)}</span>
+            <span className="countdown-unit">時間</span>
+          </div>
+          <div className="countdown-item">
+            <span className="countdown-number">{pad(countdown.minutes)}</span>
+            <span className="countdown-unit">分</span>
+          </div>
+          <div className="countdown-item">
+            <span className="countdown-number">{pad(countdown.seconds)}</span>
+            <span className="countdown-unit">秒</span>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
 
 function App() {
   const [phase, setPhase] = useState('idle') // idle | counting | revealed
@@ -178,7 +188,11 @@ function App() {
   const [echoes, setEchoes] = useState(() => {
     try {
       const saved = localStorage.getItem(ECHOES_STORAGE_KEY)
-      return saved ? JSON.parse(saved) : DEFAULT_ECHOES
+      if (!saved) return DEFAULT_ECHOES
+      // 以前 .png 名で保存された記録が残っていたら、今の .jpg 名に直す
+      return JSON.parse(saved).map((echo) =>
+        /^echo_.*\.png$/.test(echo.url) ? { ...echo, url: echo.url.replace(/\.png$/, '.jpg') } : echo,
+      )
     } catch {
       return DEFAULT_ECHOES
     }
@@ -189,8 +203,7 @@ function App() {
   const touchStartX = useRef(0)
   const fileInputRef = useRef(null)
 
-  const confetti = useMemo(() => createConfetti(70), [])
-  const balloons = useMemo(() => createBalloons(10), [])
+  const confetti = useMemo(() => createConfetti(36), [])
   const config = GENDER_CONFIG[REVEAL_GENDER]
   const [countdown, setCountdown] = useState(() => getCountdown(DUE_DATE))
 
@@ -319,12 +332,18 @@ function App() {
       {phase === 'idle' && (
         <div className="sky-decor" aria-hidden="true">
           {SKY_DECOR.map((d, i) => (
-            <d.Icon
+            <span
               key={i}
-              size={d.size}
-              color={d.color}
-              className="floaty"
-              style={{ position: 'absolute', top: d.top, left: d.left, animationDuration: `${d.duration}s` }}
+              className={`floaty shape-${d.shape}`}
+              style={{
+                top: d.top,
+                left: d.left,
+                width: d.size,
+                height: d.size,
+                borderColor: d.color,
+                background: d.shape === 'ring' ? 'transparent' : d.color,
+                animationDuration: `${d.duration}s`,
+              }}
             />
           ))}
         </div>
@@ -348,60 +367,16 @@ function App() {
               }}
             />
           ))}
-          {balloons.map((b) => (
-            <span
-              key={`balloon-${b.id}`}
-              className="balloon"
-              style={{
-                left: `${b.left}%`,
-                animationDelay: `${b.delay}s`,
-                animationDuration: `${b.duration}s`,
-                '--drift': b.drift,
-              }}
-            >
-              <span className="balloon-body" style={{ backgroundColor: b.color }}>
-                <span className="balloon-shine" />
-              </span>
-              <span className="balloon-string" />
-            </span>
-          ))}
         </div>
       )}
 
       {phase === 'idle' && (
         <div className="idle-card">
-          <div className="idle-illustration">
-            <GiftBox size={80} color="#cf93ab" ribbon="#fbf6f1" />
-          </div>
-          <p className="eyebrow">Gender Reveal</p>
-          <h1 className="idle-title">性別、発表します</h1>
+          <span className="ornament" aria-hidden="true" />
+          <h1 className="eyebrow">Gender Reveal</h1>
           <p className="idle-subtitle">ボタンを押して開封してね</p>
 
-          <div className="countdown">
-            <p className="countdown-label">予定日（12/18）まで</p>
-            {countdown.reached ? (
-              <p className="countdown-reached">出産予定日を迎えました👶✨</p>
-            ) : (
-              <div className="countdown-grid">
-                <div className="countdown-item">
-                  <span className="countdown-number">{countdown.days}</span>
-                  <span className="countdown-unit">日</span>
-                </div>
-                <div className="countdown-item">
-                  <span className="countdown-number">{pad(countdown.hours)}</span>
-                  <span className="countdown-unit">時間</span>
-                </div>
-                <div className="countdown-item">
-                  <span className="countdown-number">{pad(countdown.minutes)}</span>
-                  <span className="countdown-unit">分</span>
-                </div>
-                <div className="countdown-item">
-                  <span className="countdown-number">{pad(countdown.seconds)}</span>
-                  <span className="countdown-unit">秒</span>
-                </div>
-              </div>
-            )}
-          </div>
+          <CountdownBlock countdown={countdown} />
 
           <div className="question-row">
             <figure className="question-card">
@@ -413,7 +388,6 @@ function App() {
           </div>
 
           <button type="button" className="reveal-button" onClick={handleReveal}>
-            <GiftBox size={20} color="#ffffff" ribbon="#e7c9b0" />
             開封する
           </button>
         </div>
@@ -427,20 +401,18 @@ function App() {
 
       {phase === 'revealed' && (
         <div className="reveal-scene">
-          <div className="burst-rays" style={{ '--ray-color': config.accentSoft }} />
+          <div className="reveal-glow" style={{ '--glow-color': config.accentSoft }} />
           <div className="reveal-card">
-            <div className="reveal-icons">
-              <Heart size={20} color={config.accent} className="bounce-in bounce-1" />
-              <Star size={18} color="#c9a227" className="bounce-in bounce-2" />
-              <Heart size={14} color={config.accent} className="bounce-in bounce-3" />
-            </div>
-            <p className="reveal-kicker" style={{ color: config.accent, background: config.accentSoft }}>
-              {config.kicker}
-            </p>
-            <h1 className="reveal-message" style={{ color: config.accent }}>
-              {config.message}
+            <span className="ornament" aria-hidden="true" style={{ background: config.accent }} />
+            <h1 className="reveal-kicker">
+              <span className="reveal-kicker-lead">{config.kicker}</span>
+              <span className="reveal-kicker-word" style={{ color: config.accent }}>
+                {config.word}
+              </span>
             </h1>
             <img className="reveal-result-img" src={`${IMAGES_BASE}${config.resultImage}`} alt="" />
+
+            <CountdownBlock countdown={countdown} />
 
             <div className="echo-gallery">
               <p className="echo-title">📷 エコーギャラリー</p>
